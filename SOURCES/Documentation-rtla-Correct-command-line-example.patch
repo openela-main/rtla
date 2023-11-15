@@ -1,0 +1,37 @@
+From 877d95dcfd0a56102d4b97a9691115f5fb5e9ea3 Mon Sep 17 00:00:00 2001
+From: Pierre Gondois <pierre.gondois@arm.com>
+Date: Thu, 6 Oct 2022 10:44:09 +0200
+Subject: [PATCH] Documentation: rtla: Correct command line example
+
+The '-t/-T' parameters seem to have been swapped:
+-t/--trace[=file]: save the stopped trace
+to [file|timerlat_trace.txt]
+-T/--thread us: stop trace if the thread latency
+is higher than the argument in us
+
+Swap them back.
+
+Signed-off-by: Pierre Gondois <pierre.gondois@arm.com>
+Acked-by: Daniel Bristot de Oliveira <bristot@kernel.org>
+Link: https://lore.kernel.org/r/20221006084409.3882542-1-pierre.gondois@arm.com
+Signed-off-by: Jonathan Corbet <corbet@lwn.net>
+---
+ Documentation/tools/rtla/rtla-timerlat-top.rst | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Documentation/tools/rtla/rtla-timerlat-top.rst b/Documentation/tools/rtla/rtla-timerlat-top.rst
+index 1c321de1c171..7c4e4b109493 100644
+--- a/Documentation/rtla-timerlat-top.rst
++++ b/Documentation/rtla-timerlat-top.rst
+@@ -39,7 +39,7 @@ higher than *30 us*. It is also set to stop the session if a *Thread* timer
+ latency higher than *30 us* is hit. Finally, it is set to save the trace
+ buffer if the stop condition is hit::
+ 
+-  [root@alien ~]# rtla timerlat top -s 30 -t 30 -T
++  [root@alien ~]# rtla timerlat top -s 30 -T 30 -t
+                    Timer Latency
+     0 00:00:59   |          IRQ Timer Latency (us)        |         Thread Timer Latency (us)
+   CPU COUNT      |      cur       min       avg       max |      cur       min       avg       max
+-- 
+2.40.0
+

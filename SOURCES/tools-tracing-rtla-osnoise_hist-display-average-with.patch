@@ -1,0 +1,36 @@
+From 1fab1469b66baf7847298b205e5c4aff47c2ae8a Mon Sep 17 00:00:00 2001
+From: Andreas Ziegler <br015@umbiko.net>
+Date: Tue, 3 Jan 2023 11:34:00 +0100
+Subject: [PATCH 2/8] tools/tracing/rtla: osnoise_hist: display average with
+ two-digit precision
+
+Calculate average value in osnoise-hist summary with two-digit
+precision to avoid displaying too optimitic results.
+
+Link: https://lkml.kernel.org/r/20230103103400.275566-3-br015@umbiko.net
+
+Signed-off-by: Andreas Ziegler <br015@umbiko.net>
+Acked-by: Daniel Bristot de Oliveira <bristot@kernel.org>
+Signed-off-by: Steven Rostedt (Google) <rostedt@goodmis.org>
+---
+ src/osnoise_hist.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/osnoise_hist.c b/src/osnoise_hist.c
+index fe34452fc4ec..13e1233690bb 100644
+--- a/src/osnoise_hist.c
++++ b/src/osnoise_hist.c
+@@ -335,8 +335,8 @@ osnoise_print_summary(struct osnoise_hist_params *params,
+ 			continue;
+ 
+ 		if (data->hist[cpu].count)
+-			trace_seq_printf(trace->seq, "%9llu ",
+-					data->hist[cpu].sum_sample / data->hist[cpu].count);
++			trace_seq_printf(trace->seq, "%9.2f ",
++				((double) data->hist[cpu].sum_sample) / data->hist[cpu].count);
+ 		else
+ 			trace_seq_printf(trace->seq, "        - ");
+ 	}
+-- 
+2.40.1
+

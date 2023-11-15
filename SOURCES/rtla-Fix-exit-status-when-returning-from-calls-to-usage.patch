@@ -1,0 +1,155 @@
+From 4c6874374859d89aa6a75019bb0a913369e472c9 Mon Sep 17 00:00:00 2001
+From: John Kacur <jkacur@redhat.com>
+Date: Mon, 7 Nov 2022 09:43:13 -0500
+Subject: [PATCH] rtla: Fix exit status when returning from calls to usage()
+
+rtla_usage(), osnoise_usage() and timerlat_usage() all exit with an
+error status.
+
+However when these are called from help, they should exit with a
+non-error status.
+
+Fix this by passing the exit status to the functions.
+
+Note, although we remove the subsequent call to exit after calling
+usage, we leave it in at the end of a function to suppress the compiler
+warning "control reaches end of a non-void function".
+
+Link: https://lkml.kernel.org/r/20221107144313.22470-1-jkacur@redhat.com
+
+Signed-off-by: John Kacur <jkacur@redhat.com>
+Acked-by: Daniel Bristot de Oliveira <bristot@kernel.org>
+Signed-off-by: Steven Rostedt (Google) <rostedt@goodmis.org>
+---
+ src/osnoise.c  |  9 ++++-----
+ src/rtla.c     | 12 +++++-------
+ src/timerlat.c |  9 ++++-----
+ 3 files changed, 13 insertions(+), 17 deletions(-)
+
+diff --git a/src/osnoise.c b/src/osnoise.c
+index b8ec6c15bccb..4dee343909b1 100644
+--- a/src/osnoise.c
++++ b/src/osnoise.c
+@@ -903,7 +903,7 @@ struct osnoise_tool *osnoise_init_trace_tool(char *tracer)
+ 	return NULL;
+ }
+ 
+-static void osnoise_usage(void)
++static void osnoise_usage(int err)
+ {
+ 	int i;
+ 
+@@ -923,7 +923,7 @@ static void osnoise_usage(void)
+ 
+ 	for (i = 0; msg[i]; i++)
+ 		fprintf(stderr, "%s\n", msg[i]);
+-	exit(1);
++	exit(err);
+ }
+ 
+ int osnoise_main(int argc, char *argv[])
+@@ -941,8 +941,7 @@ int osnoise_main(int argc, char *argv[])
+ 	}
+ 
+ 	if ((strcmp(argv[1], "-h") == 0) || (strcmp(argv[1], "--help") == 0)) {
+-		osnoise_usage();
+-		exit(0);
++		osnoise_usage(0);
+ 	} else if (strncmp(argv[1], "-", 1) == 0) {
+ 		/* the user skipped the tool, call the default one */
+ 		osnoise_top_main(argc, argv);
+@@ -956,6 +955,6 @@ int osnoise_main(int argc, char *argv[])
+ 	}
+ 
+ usage:
+-	osnoise_usage();
++	osnoise_usage(1);
+ 	exit(1);
+ }
+diff --git a/src/rtla.c b/src/rtla.c
+index 09bd21b8af81..52e8f1825281 100644
+--- a/src/rtla.c
++++ b/src/rtla.c
+@@ -14,7 +14,7 @@
+ /*
+  * rtla_usage - print rtla usage
+  */
+-static void rtla_usage(void)
++static void rtla_usage(int err)
+ {
+ 	int i;
+ 
+@@ -33,7 +33,7 @@ static void rtla_usage(void)
+ 
+ 	for (i = 0; msg[i]; i++)
+ 		fprintf(stderr, "%s\n", msg[i]);
+-	exit(1);
++	exit(err);
+ }
+ 
+ /*
+@@ -70,11 +70,9 @@ int main(int argc, char *argv[])
+ 		goto usage;
+ 
+ 	if (strcmp(argv[1], "-h") == 0) {
+-		rtla_usage();
+-		exit(0);
++		rtla_usage(0);
+ 	} else if (strcmp(argv[1], "--help") == 0) {
+-		rtla_usage();
+-		exit(0);
++		rtla_usage(0);
+ 	}
+ 
+ 	retval = run_command(argc, argv, 1);
+@@ -82,6 +80,6 @@ int main(int argc, char *argv[])
+ 		exit(0);
+ 
+ usage:
+-	rtla_usage();
++	rtla_usage(1);
+ 	exit(1);
+ }
+diff --git a/src/timerlat.c b/src/timerlat.c
+index 97abbf494fee..21cdcc5c4a29 100644
+--- a/src/timerlat.c
++++ b/src/timerlat.c
+@@ -14,7 +14,7 @@
+ 
+ #include "timerlat.h"
+ 
+-static void timerlat_usage(void)
++static void timerlat_usage(int err)
+ {
+ 	int i;
+ 
+@@ -34,7 +34,7 @@ static void timerlat_usage(void)
+ 
+ 	for (i = 0; msg[i]; i++)
+ 		fprintf(stderr, "%s\n", msg[i]);
+-	exit(1);
++	exit(err);
+ }
+ 
+ int timerlat_main(int argc, char *argv[])
+@@ -52,8 +52,7 @@ int timerlat_main(int argc, char *argv[])
+ 	}
+ 
+ 	if ((strcmp(argv[1], "-h") == 0) || (strcmp(argv[1], "--help") == 0)) {
+-		timerlat_usage();
+-		exit(0);
++		timerlat_usage(0);
+ 	} else if (strncmp(argv[1], "-", 1) == 0) {
+ 		/* the user skipped the tool, call the default one */
+ 		timerlat_top_main(argc, argv);
+@@ -67,6 +66,6 @@ int timerlat_main(int argc, char *argv[])
+ 	}
+ 
+ usage:
+-	timerlat_usage();
++	timerlat_usage(1);
+ 	exit(1);
+ }
+-- 
+2.39.0
+
